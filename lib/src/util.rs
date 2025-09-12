@@ -20,6 +20,7 @@ impl Default for RuntimeMetadata {
     }
 }
 
+
 impl RuntimeMetadata {
     /// Return the binary and system information, attempting to retrieve
     /// attributes from `uname(2)` and falling back to values from

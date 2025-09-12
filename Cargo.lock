@@ -2743,7 +2743,7 @@ dependencies = [
 
 [[package]]
 name = "rayhunter-daemon"
-version = "0.6.1"
+version = "0.6.1-test"
 dependencies = [
  "anyhow",
  "async-trait",

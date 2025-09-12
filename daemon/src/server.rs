@@ -267,6 +267,114 @@ pub async fn debug_set_display_state(
     }
 }
 
+// New function to get the IMEI
+pub async fn get_imei(
+    State(_state): State<Arc<ServerState>>,
+) -> Result<String, (StatusCode, String)> {
+    // Execute the imei-util --get command
+    let output = tokio::process::Command::new("imei-util")
+        .arg("--get")
+        .output()
+        .await
+        .map_err(|err| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to execute imei-util --get command: {err}"),
+            )
+        })?;
+
+    if !output.status.success() {
+        return Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!(
+                "imei-util --get command failed with exit code: {}",
+                output.status.code().unwrap_or(-1)
+            ),
+        ));
+    }
+
+    let imei = String::from_utf8(output.stdout)
+        .map_err(|err| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to parse imei-util --get output: {err}"),
+            )
+        })?
+        .trim()
+        .to_string();
+
+    Ok(imei)
+}
+
+// New function to change the IMEI
+pub async fn change_imei(
+    State(_state): State<Arc<ServerState>>,
+) -> Result<String, (StatusCode, String)> {
+    // Execute the imei-util --set random command
+    let output = tokio::process::Command::new("imei-util")
+        .arg("--set")
+        .arg("random")
+        .output()
+        .await
+        .map_err(|err| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to execute imei-util --set random command: {err}"),
+            )
+        })?;
+
+    if !output.status.success() {
+        return Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!(
+                "imei-util --set random command failed with exit code: {}",
+                output.status.code().unwrap_or(-1)
+            ),
+        ));
+    }
+
+    // Return the new IMEI from the command output
+    let new_imei = String::from_utf8(output.stdout)
+        .map_err(|err| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to parse imei-util --set random output: {err}"),
+            )
+        })?
+        .trim()
+        .to_string();
+
+    Ok(new_imei)
+}
+
+// New function to reboot the system
+pub async fn reboot_system(
+    State(_state): State<Arc<ServerState>>,
+) -> Result<String, (StatusCode, String)> {
+    // Execute the reboot command
+    let output = tokio::process::Command::new("reboot")
+        .output()
+        .await
+        .map_err(|err| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to execute reboot command: {err}"),
+            )
+        })?;
+
+    if !output.status.success() {
+        return Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!(
+                "reboot command failed with exit code: {}",
+                output.status.code().unwrap_or(-1)
+            ),
+        ));
+    }
+
+    Ok("System reboot initiated".to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

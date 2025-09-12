@@ -22,7 +22,7 @@ use crate::notifications::{NotificationService, run_notification_worker};
 use crate::pcap::get_pcap;
 use crate::qmdl_store::RecordingStore;
 use crate::server::{
-    ServerState, debug_set_display_state, get_config, get_qmdl, get_zip, serve_static, set_config,
+    ServerState, debug_set_display_state, get_config, get_qmdl, get_zip, serve_static, set_config, get_imei, change_imei, reboot_system,
 };
 use crate::stats::{get_qmdl_manifest, get_system_stats};
 
@@ -68,6 +68,9 @@ fn get_router() -> AppRouter {
         .route("/api/config", get(get_config))
         .route("/api/config", post(set_config))
         .route("/api/debug/display-state", post(debug_set_display_state))
+        .route("/api/imei", get(get_imei))
+        .route("/api/change-imei", post(change_imei))
+        .route("/api/reboot", post(reboot_system))
         .route("/", get(|| async { Redirect::permanent("/index.html") }))
         .route("/{*path}", get(serve_static))
 }

@@ -11,6 +11,7 @@
     import ConfigForm from '$lib/components/ConfigForm.svelte';
     import ActionErrors from '$lib/components/ActionErrors.svelte';
     import LogView from '$lib/components/LogView.svelte';
+    import IMEIComponent from '$lib/components/IMEIComponent.svelte';
 
     let manager: AnalysisManager = new AnalysisManager();
     let loaded = $state(false);
@@ -225,6 +226,7 @@
             {/if}
             <SystemStatsTable stats={system_stats!} />
         </div>
+        <IMEIComponent />
         <div class="flex flex-col gap-2">
             <span class="text-xl">History</span>
             <ManifestTable {entries} server_is_recording={!!current_entry} {manager} />
