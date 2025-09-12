@@ -6,21 +6,7 @@ use super::analyzer::{Analyzer, Event, EventType};
 use super::information_element::{InformationElement, LteInformationElement};
 use deku::bitvec::*;
 
-pub struct TestAnalyzer {
-    packet_num: usize,
-}
-
-impl Default for TestAnalyzer {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl TestAnalyzer {
-    pub fn new() -> Self {
-        Self { packet_num: 0 }
-    }
-}
+pub struct TestAnalyzer {}
 
 impl Analyzer for TestAnalyzer {
     fn get_name(&self) -> Cow<'_, str> {
@@ -37,9 +23,11 @@ impl Analyzer for TestAnalyzer {
         1
     }
 
-    fn analyze_information_element(&mut self, ie: &InformationElement) -> Option<Event> {
-        self.packet_num += 1;
-
+    fn analyze_information_element(
+        &mut self,
+        ie: &InformationElement,
+        _packet_num: usize,
+    ) -> Option<Event> {
         if let InformationElement::LTE(lte_ie) = ie
             && let LteInformationElement::BcchDlSch(sch_msg) = &**lte_ie
             && let BCCH_DL_SCH_MessageType::C1(c1) = &sch_msg.message
@@ -50,23 +38,32 @@ impl Analyzer for TestAnalyzer {
                 .cell_identity
                 .0
                 .as_bitslice()
-                .load::<u32>();
+                .load_be::<u32>();
             let plmn = &sib1.cell_access_related_info.plmn_identity_list.0;
             let mcc_string: String;
 
+            // MCC are always 3 digits
             if let Some(mcc) = &plmn[0].plmn_identity.mcc {
                 mcc_string = format!("{}{}{}", mcc.0[0].0, mcc.0[1].0, mcc.0[2].0);
             } else {
                 mcc_string = "nomcc".to_string();
             }
             let mnc = &plmn[0].plmn_identity.mnc;
-            let mnc_string: String = format!("{}{}{}", mnc.0[0].0, mnc.0[1].0, mnc.0[2].0);
+            let mnc_string: String;
+            // MNC can be 2 or 3 digits
+            if mnc.0.len() == 3 {
+                mnc_string = format!("{}{}{}", mnc.0[0].0, mnc.0[1].0, mnc.0[2].0);
+            } else if mnc.0.len() == 2 {
+                mnc_string = format!("{}{}", mnc.0[0].0, mnc.0[1].0);
+            } else {
+                mnc_string = format!("{:?}", mnc.0);
+            }
 
             return Some(Event {
                 event_type: EventType::Low,
                 message: format!(
-                    "SIB1 received (packet {}) CID: {}, PLMN: {}-{}",
-                    self.packet_num, cid, mcc_string, mnc_string
+                    "SIB1 received CID: {}, PLMN: {}-{}",
+                    cid, mcc_string, mnc_string
                 ),
             });
         }
