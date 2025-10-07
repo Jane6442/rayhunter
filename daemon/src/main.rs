@@ -22,7 +22,8 @@ use crate::notifications::{NotificationService, run_notification_worker};
 use crate::pcap::get_pcap;
 use crate::qmdl_store::RecordingStore;
 use crate::server::{
-    ServerState, debug_set_display_state, get_config, get_qmdl, get_zip, serve_static, set_config, get_imei, change_imei, reboot_system,
+    ServerState, change_imei, debug_set_display_state, get_config, get_imei, get_qmdl, get_zip,
+    reboot_system, serve_static, set_config,
 };
 use crate::stats::{get_qmdl_manifest, get_system_stats};
 
