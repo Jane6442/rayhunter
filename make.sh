@@ -2,8 +2,8 @@
 pushd daemon/web
     npm run build
 popd
-cargo build --profile firmware-devel --bin rayhunter-daemon --target="armv7-unknown-linux-musleabihf" #--features debug
-adb shell '/bin/sh -c "/etc/init.d/rayhunter_daemon stop"'
+cargo build-daemon-firmware-devel
+adb shell '/bin/rootshell -c "/etc/init.d/rayhunter_daemon stop"'
 adb push target/armv7-unknown-linux-musleabihf/firmware-devel/rayhunter-daemon \
     /data/rayhunter/rayhunter-daemon
 echo "rebooting the device..."
